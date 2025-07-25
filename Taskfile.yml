@@ -1,0 +1,44 @@
+version: '3'
+
+env:
+  JAVA_HOME: '{{.JAVA_HOME | default "C:\Users\Public\wpilib\2025\jdk"}}'
+
+tasks:
+  build:
+    desc: Build the robot code
+    cmds:
+      - ./gradlew build
+    sources:
+      - 'src/**/*.java'
+      - 'build.gradle'
+    generates:
+      - 'build/libs/*.jar'
+
+  deploy:
+    desc: Deploy code to the robot
+    deps: [build]
+    cmds:
+      - ./gradlew deploy
+    
+  simulate:
+    desc: Run robot code simulation
+    cmds:
+      - ./gradlew simulateJava
+    interactive: true
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - ./gradlew test
+    sources:
+      - 'src/test/**/*.java'
+      - 'src/main/**/*.java'
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - ./gradlew clean
+
+  default:
+    desc: Build and deploy robot code
+    deps: [deploy]
