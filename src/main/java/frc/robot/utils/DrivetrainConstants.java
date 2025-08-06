@@ -11,7 +11,8 @@ import frc.robot.subsystems.swerve.TunerConstants;
 import frc.robot.utils.preferences.RobotPreferences;
 
 public class DrivetrainConstants {
-    public static final double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    // public static final double maxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+    public static final double maxSpeed = 3;
     public static final double maxAngularSpeed = Math.PI;
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 

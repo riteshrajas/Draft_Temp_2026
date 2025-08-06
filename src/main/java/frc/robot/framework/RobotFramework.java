@@ -2,6 +2,8 @@ package frc.robot.framework;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.DrivetrainConstants;
 import frc.robot.utils.preferences.RobotPreferences;
@@ -20,6 +22,7 @@ public class RobotFramework {
     protected final CommandSwerveDrivetrain drivetrain = DrivetrainConstants.drivetrain;
 
     protected final CommandXboxController joystick = new CommandXboxController(0);
+    // protected final CommandXboxController joystick = new CommandXboxController(0);
 
     protected final TeleOpBuilder TeleOpBuilder = new TeleOpBuilder(drivetrain, joystick, DrivetrainConstants.prefs);
 
@@ -121,6 +124,7 @@ public class RobotFramework {
                 if (Math.hypot(rightX, rightY) > 0.7) { // Deadband check - increased to prevent accidental changes
                     // Calculate joystick angle and convert to 0-360
                     double joystickAngleDegrees = Math.toDegrees(Math.atan2(rightY, rightX)) - 90;
+                    // Making sure the angle doesn't exceed 359 Degrees at a time
                     double normalizedAngle = -1* ((joystickAngleDegrees + 360) % 360);
                     // Determine which 10-degree zone the angle is in
                     int zoneIndex = (int) (normalizedAngle / 10);
@@ -128,11 +132,14 @@ public class RobotFramework {
                     double zoneCenterDegrees = zoneIndex * 10.0 + 5.0;
                     // Set the target direction to the center of the zone
                     DrivetrainConstants.lastTargetDirection = Rotation2d.fromDegrees(zoneCenterDegrees);
+                    // A Live transalation of the Controller lx.ly band
                     SmartDashboard.putNumber("Target Angle", zoneCenterDegrees);
                 }
                 Rotation2d currentRotation = drivetrain.getState().Pose.getRotation();
                 double errorRad = DrivetrainConstants.lastTargetDirection.minus(currentRotation).getRadians();
-                double rotationalRateRadPerSec = errorRad * 5;
+                double rotationalRateRadPerSec = errorRad * 2;
+
+                // 
                 rotationalRateRadPerSec = Math.max(-DrivetrainConstants.getMaxAngularSpeed(), Math.min(DrivetrainConstants.getMaxAngularSpeed(), rotationalRateRadPerSec));
 
                 if (prefs.isFieldCentricEnabled())
