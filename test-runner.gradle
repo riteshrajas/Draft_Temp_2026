@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+    id 'edu.wpi.first.GradleRIO' version '2025.1.1-beta-2'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+// Define task to run our demo test
+task runDemoTest(type: JavaExec) {
+    group = 'application'
+    description = 'Run the demo test'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.utils.advancedcontrollers.DemoTest'
+}

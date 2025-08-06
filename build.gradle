@@ -102,3 +102,36 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile) {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
+
+// Task to run the demo test
+task runDemoTest(type: JavaExec) {
+    group = 'application'
+    description = 'Run the demo test'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.utils.advancedcontrollers.DemoTest'
+}
+
+// Task to run demo test with components
+task runDemoTestComponents(type: JavaExec) {
+    group = 'application'
+    description = 'Run the demo test with individual component testing'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.utils.advancedcontrollers.DemoTest'
+    args = ['components']
+}
+
+// Task to run improved demo
+task runImprovedDemo(type: JavaExec) {
+    group = 'application'
+    description = 'Run the improved demo with fixed issues'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.utils.advancedcontrollers.ImprovedDemo'
+}
+
+// Task to run comprehensive analysis
+task runComprehensiveTest(type: JavaExec) {
+    group = 'application'
+    description = 'Run comprehensive analysis of the demo issues and solutions'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.utils.advancedcontrollers.ComprehensiveTest'
+}

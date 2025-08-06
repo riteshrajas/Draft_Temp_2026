@@ -1,6 +1,5 @@
 package frc.robot.utils.advancedcontrollers;
 
-import java.util.Arrays;
 
 public class Polynomial {
 
