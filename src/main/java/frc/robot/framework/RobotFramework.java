@@ -2,8 +2,6 @@ package frc.robot.framework;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.utils.DrivetrainConstants;
 import frc.robot.utils.preferences.RobotPreferences;
@@ -121,25 +119,19 @@ public class RobotFramework {
             return drivetrain.applyRequest(() -> {
                 double rightX = -joystick.getRightX();
                 double rightY = -joystick.getRightY();
-                if (Math.hypot(rightX, rightY) > 0.7) { // Deadband check - increased to prevent accidental changes
-                    // Calculate joystick angle and convert to 0-360
+                if (Math.hypot(rightX, rightY) > 0.7) {
                     double joystickAngleDegrees = Math.toDegrees(Math.atan2(rightY, rightX)) - 90;
-                    // Making sure the angle doesn't exceed 359 Degrees at a time
                     double normalizedAngle = -1* ((joystickAngleDegrees + 360) % 360);
-                    // Determine which 10-degree zone the angle is in
                     int zoneIndex = (int) (normalizedAngle / 10);
-                    // Calculate the center of that zone
                     double zoneCenterDegrees = zoneIndex * 10.0 + 5.0;
-                    // Set the target direction to the center of the zone
                     DrivetrainConstants.lastTargetDirection = Rotation2d.fromDegrees(zoneCenterDegrees);
-                    // A Live transalation of the Controller lx.ly band
                     SmartDashboard.putNumber("Target Angle", zoneCenterDegrees);
                 }
                 Rotation2d currentRotation = drivetrain.getState().Pose.getRotation();
                 double errorRad = DrivetrainConstants.lastTargetDirection.minus(currentRotation).getRadians();
                 double rotationalRateRadPerSec = errorRad * 2;
 
-                // 
+    
                 rotationalRateRadPerSec = Math.max(-DrivetrainConstants.getMaxAngularSpeed(), Math.min(DrivetrainConstants.getMaxAngularSpeed(), rotationalRateRadPerSec));
 
                 if (prefs.isFieldCentricEnabled())
@@ -155,7 +147,40 @@ public class RobotFramework {
             }); 
         }
     
-    public Command getRotationDegreesCommand(double degrees) {
+    public Command getRotationDegreesCommand(double degrees, boolean stayOnTarget) {
+        /* Create a command to rotate the robot to a specific angle with a P-controller */
+        return drivetrain.applyRequest(() -> {
+            double kAngleP = 5; // Proportional gain for angle controller - TUNE THIS
+            double maxAngularRate = Math.PI; // Max rotational speed in rad/s - TUNE THIS
+
+            Rotation2d currentRotation = drivetrain.getState().Pose.getRotation();
+            Rotation2d targetRotation = Rotation2d.fromDegrees(degrees);
+
+            // The error is the difference in rotation, handled by Rotation2d to be (-pi, pi)
+            double errorRad = targetRotation.minus(currentRotation).getRadians();
+
+            // Calculate the rotational rate using a P-controller
+            double rotationalRateRadPerSec = errorRad * kAngleP;
+
+            // Cap the rotational rate
+            rotationalRateRadPerSec = Math.max(-maxAngularRate, Math.min(maxAngularRate, rotationalRateRadPerSec));
+            if (stayOnTarget) {
+                // If we want to stay on target, we can just return the rate
+                DrivetrainConstants.lastTargetDirection = targetRotation;
+            } 
+            DrivetrainConstants.lastTargetDirection = targetRotation;
+
+            // Use a FieldCentric request to apply only rotation
+            return new SwerveRequest.FieldCentric()
+                .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+                .withVelocityX(0)
+                .withVelocityY(0)
+                .withRotationalRate(rotationalRateRadPerSec); // Rotational rate in rad/s
+        });
+    }
+
+
+        public Command getRotationDegreesCommand(double degrees) {
         /* Create a command to rotate the robot to a specific angle with a P-controller */
         return drivetrain.applyRequest(() -> {
             double kAngleP = 5; // Proportional gain for angle controller - TUNE THIS
@@ -188,6 +213,6 @@ public class RobotFramework {
         });
     }
 
-    
+
 
 }
