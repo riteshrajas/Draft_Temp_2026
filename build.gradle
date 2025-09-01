@@ -135,3 +135,11 @@ task runComprehensiveTest(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'frc.robot.utils.advancedcontrollers.ComprehensiveTest'
 }
+
+// Task to run production CurveKit test
+task runProductionTest(type: JavaExec) {
+    group = 'application'
+    description = 'Test the production-ready CurveKit implementation'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'frc.robot.utils.advancedcontrollers.ProductionCurveKitTest'
+}

@@ -47,5 +47,23 @@ public class Polynomial {
         return new Polynomial(trimmedCoeffs);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = coefficients.length - 1; i >= 0; i--) {
+            if (i < coefficients.length - 1) {
+                sb.append(" + ");
+            }
+            sb.append(coefficients[i]);
+            if (i > 0) {
+                sb.append("x");
+                if (i > 1) {
+                    sb.append("^").append(i);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     
 }
