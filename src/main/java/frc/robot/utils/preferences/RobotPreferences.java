@@ -1,12 +1,13 @@
 package frc.robot.utils.preferences;
 
-import edu.wpi.first.wpilibj.Preferences;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.HashMap;
 import java.util.Map;
+
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.Preferences;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class RobotPreferences {
     private static RobotPreferences instance;
@@ -231,11 +232,13 @@ public class RobotPreferences {
     // Convenience methods for common operations
     public double getRobotSpeedMultiplier() {
         int driveMode = getInt(DRIVE_MODE);
-        switch (driveMode) {
-            case 1: return getDouble(PRECISION_MODE_SPEED); // Precision mode
-            case 2: return getDouble(TURBO_MODE_SPEED); // Turbo mode
-            default: return getDouble(ROBOT_SPEED_MULTIPLIER); // Normal mode
-        }
+        return switch (driveMode) {
+            case 1 -> getDouble(PRECISION_MODE_SPEED);
+            case 2 -> getDouble(TURBO_MODE_SPEED);
+            default -> getDouble(ROBOT_SPEED_MULTIPLIER);
+        }; // Precision mode
+        // Turbo mode
+        // Normal mode
     }
 
     public double getRotationSpeedMultiplier() {
@@ -276,14 +279,14 @@ public class RobotPreferences {
             String key = entry.getKey();
             Object value = entry.getValue();
             
-            if (value instanceof Double) {
-                Preferences.setDouble(key, (Double) value);
-            } else if (value instanceof Boolean) {
-                Preferences.setBoolean(key, (Boolean) value);
-            } else if (value instanceof Integer) {
-                Preferences.setInt(key, (Integer) value);
-            } else if (value instanceof String) {
-                Preferences.setString(key, (String) value);
+            if (value instanceof Double aDouble) {
+                Preferences.setDouble(key, aDouble);
+            } else if (value instanceof Boolean aBoolean) {
+                Preferences.setBoolean(key, aBoolean);
+            } else if (value instanceof Integer integer) {
+                Preferences.setInt(key, integer);
+            } else if (value instanceof String string) {
+                Preferences.setString(key, string);
             }
         }
         

@@ -50,13 +50,6 @@ public class RobotContainer extends RobotFramework{
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
         );
 
-
-
-
-        // Press A to rotate robot to 90 degrees
-        joystick.a().whileTrue(getRotationDegreesCommand(90));
-        joystick.b().whileTrue(getRotationDegreesCommand(90, true));
-
         drivetrain.registerTelemetry(logger::telemeterize);
     }
 
