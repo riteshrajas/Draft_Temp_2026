@@ -1,5 +1,6 @@
 package frc.robot.utils.motion;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -47,10 +48,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * </ul>
  */
 public class PIDControllerWrapper {
-    private PIDController pidController;
-    private String name;
+    private final PIDController pidController;
+    private final String name;
     private boolean tuningEnabled = false;
-    private double lastKp, lastKi, lastKd;
+    private double lastKp, lastKi, lastKd, lastKg, lastKs;
+    private double tolerance = 0;
+    private ArmFeedforward feedforward;
+
 
     /**
      * Create a PID controller wrapper and publish initial values to the
@@ -67,9 +71,39 @@ public class PIDControllerWrapper {
         this.lastKp = kp;
         this.lastKi = ki;
         this.lastKd = kd;
-        
+        this.lastKg = 0;
+        this.lastKs = 0;
+        this.feedforward = new ArmFeedforward(0, 0, 0, 0);
+
         initializeDashboard();
     }
+    /**
+     * Create a PID controller wrapper and publish initial values to the
+     * SmartDashboard under the provided {@code name}.
+     *
+     * @param name human-readable name used as a SmartDashboard key prefix (e.g. "Drive/Heading")
+     * @param kp initial proportional gain
+     * @param ki initial integral gain
+     * @param kd initial derivative gain
+     * @param kg initial gravity gain
+     * @param ks initial static gain
+     */
+    public PIDControllerWrapper(String name, double kp, double ki, double kd, double kg, double ks) {
+        this.name = name;
+        this.pidController = new PIDController(kp, ki, kd);
+        this.lastKp = kp;
+        this.lastKi = ki;
+        this.lastKd = kd;
+        this.lastKg = kg;
+        this.lastKs = ks;
+        this.feedforward = new ArmFeedforward(ks, kg, 0, 0);
+
+        initializeDashboard();
+    }
+
+
+   
+
 
     /**
      * Publish initial values to SmartDashboard so a tuner can see and adjust them.
@@ -78,6 +112,9 @@ public class PIDControllerWrapper {
      *   <li>{@code name + "/kP"}</li>
      *   <li>{@code name + "/kI"}</li>
      *   <li>{@code name + "/kD"}</li>
+     *   <li>{@code name + "/kG"}</li>
+     *   <li>{@code name + "/kS"}</li>
+     *   <li>{@code name + "/Tolerance"}</li>
      *   <li>{@code name + "/TuningEnabled"}</li>
      * </ul>
      */
@@ -85,6 +122,9 @@ public class PIDControllerWrapper {
         SmartDashboard.putNumber(name + "/kP", lastKp);
         SmartDashboard.putNumber(name + "/kI", lastKi);
         SmartDashboard.putNumber(name + "/kD", lastKd);
+        SmartDashboard.putNumber(name + "/kG", lastKg);
+        SmartDashboard.putNumber(name + "/kS", lastKs);
+        SmartDashboard.putNumber(name + "/Tolerance", tolerance);
         SmartDashboard.putBoolean(name + "/TuningEnabled", tuningEnabled);
     }
 
@@ -110,7 +150,9 @@ public class PIDControllerWrapper {
     public double calculate(double measurement, double setpoint) {
         updateFromDashboard();
         
-        double output = pidController.calculate(measurement, setpoint);
+        double pidOutput = pidController.calculate(measurement, setpoint);
+        double ffOutput = feedforward.calculate(setpoint, 0); // Assuming setpoint is position, velocity = 0
+        double output = pidOutput + ffOutput;
         
         return output;
     }
@@ -125,12 +167,20 @@ public class PIDControllerWrapper {
         double kp = SmartDashboard.getNumber(name + "/kP", lastKp);
         double ki = SmartDashboard.getNumber(name + "/kI", lastKi);
         double kd = SmartDashboard.getNumber(name + "/kD", lastKd);
+        double kg = SmartDashboard.getNumber(name + "/kG", lastKg);
+        double ks = SmartDashboard.getNumber(name + "/kS", lastKs);
+        double tol = SmartDashboard.getNumber(name + "/Tolerance", tolerance);
 
-        if (kp != lastKp || ki != lastKi || kd != lastKd) {
+        if (kp != lastKp || ki != lastKi || kd != lastKd || kg != lastKg || ks != lastKs || tol != tolerance) {
             pidController.setPID(kp, ki, kd);
+            feedforward = new ArmFeedforward(ks, kg, 0, 0);
+            pidController.setTolerance(tol);
             lastKp = kp;
             lastKi = ki;
             lastKd = kd;
+            lastKg = kg;
+            lastKs = ks;
+            tolerance = tol;
         }
     }
 
@@ -140,6 +190,7 @@ public class PIDControllerWrapper {
      * @param tolerance tolerance value used by {@link PIDController#atSetpoint()}
      */
     public void setTolerance(double tolerance) {
+        this.tolerance = tolerance;
         pidController.setTolerance(tolerance);
     }
 

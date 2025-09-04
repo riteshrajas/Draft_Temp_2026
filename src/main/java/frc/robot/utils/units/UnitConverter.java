@@ -50,12 +50,20 @@ public class UnitConverter {
         double rotations = ticks / ticksPerRevolution;
         return rotations * Math.PI * wheelDiameter;
     }
-    
+
+ 
     public static double distanceToEncoderTicks(double distance, double ticksPerRevolution, double wheelDiameter) {
         double rotations = distance / (Math.PI * wheelDiameter);
         return rotations * ticksPerRevolution;
     }
-    
+
+    // Encoder rotations to distance
+    public static double encodersToRotations(double encoderValue, double gearRadius, double wheelRadius) {
+        double wheelCircumference = 2 * Math.PI * wheelRadius;
+        double gearCircumference = 2 * Math.PI * gearRadius;
+        return (encoderValue / gearCircumference) * wheelCircumference;
+    }
+
     // Drivetrain specific
     public static double wheelRpmToGroundSpeed(double wheelRpm, double wheelDiameter) {
         double wheelCircumference = Math.PI * wheelDiameter;
@@ -66,4 +74,5 @@ public class UnitConverter {
         double wheelCircumference = Math.PI * wheelDiameter;
         return groundSpeed * 60 / wheelCircumference; // Convert to RPM
     }
+
 }

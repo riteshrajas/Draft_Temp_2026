@@ -12,8 +12,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import frc.robot.States.ElevatorState;
 import frc.robot.framework.RobotFramework;
+import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.utils.DrivetrainConstants;
+import frc.robot.utils.advancedcontrollers.Action;
+import frc.robot.utils.advancedcontrollers.ActionCommand;
+import frc.robot.utils.controller.Keyboard;
 import frc.robot.utils.telemetry.TelemetryManager;
 
 
@@ -24,8 +29,15 @@ public class RobotContainer extends RobotFramework{
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
     private final SendableChooser<Command> teleOpChooser;
+    private final Keyboard keyboard;
+    private final Elevator elevatorSubsystem;
+  
 
     public RobotContainer() {
+        elevatorSubsystem = new Elevator();
+        keyboard = new Keyboard();
+        // Keyboard.initialize();
+
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -44,7 +56,26 @@ public class RobotContainer extends RobotFramework{
             TeleOpBuilder.buildFalconDrive(DrivetrainConstants.getMaxSpeed(), DrivetrainConstants.getMaxAngularSpeed())
         );
 
-       
+        
+     
+        joystick.y().onTrue(
+            new ActionCommand(elevatorSubsystem.moveToHeight(ElevatorState.Zero))
+        );
+
+
+        // Custom action with parameter
+        joystick.button(1).whileTrue(
+            new ActionCommand(
+                Action.set(
+                    (unused) -> System.out.println("Button 1 pressed!"),
+                    null
+                )
+            
+            )
+        );
+
+
+
         final var idle = new SwerveRequest.Idle();
         RobotModeTriggers.disabled().whileTrue(
             drivetrain.applyRequest(() -> idle).ignoringDisable(true)
